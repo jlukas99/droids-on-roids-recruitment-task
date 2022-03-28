@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../router/router.gr.dart';
+import '../presentation/router/router.gr.dart';
 
 class MovieApp extends StatelessWidget {
   final AppRouter appRouter;

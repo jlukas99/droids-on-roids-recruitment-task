@@ -1,55 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_recruitment_task/presentation/pages/movie_list/cubit/movie_list_cubit.dart';
+import 'package:hooked_bloc/hooked_bloc.dart';
 import '../../../domain/models/movie.dart';
 import 'movie_card.dart';
 import 'search_box.dart';
-import 'package:flutter_recruitment_task/services/api_service.dart';
 
-class MovieListPage extends StatefulWidget {
+class MovieListPage extends HookWidget {
+  const MovieListPage({Key? key}) : super(key: key);
+
   @override
-  _MovieListPage createState() => _MovieListPage();
+  Widget build(BuildContext context) {
+    final cubit = useCubit<MovieListCubit>();
+
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.movie_creation_outlined),
+            onPressed: () {
+              //TODO implement navigation
+            },
+          ),
+        ],
+        title: Text('Movie Browser'),
+      ),
+      body: Column(
+        children: <Widget>[
+          SearchBox(onSubmitted: cubit.searchMovies),
+          Expanded(child: _BuildContent(cubit)),
+        ],
+      ),
+    );
+  }
 }
 
-class _MovieListPage extends State<MovieListPage> {
-  final apiService = ApiService();
-
-  Future<List<Movie>> _movieList = Future.value([]);
+class _BuildContent extends HookWidget {
+  final MovieListCubit _cubit;
+  const _BuildContent(this._cubit, {Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              icon: Icon(Icons.movie_creation_outlined),
-              onPressed: () {
-                //TODO implement navigation
-              },
-            ),
-          ],
-          title: Text('Movie Browser'),
-        ),
-        body: Column(
-          children: <Widget>[
-            SearchBox(onSubmitted: _onSearchBoxSubmitted),
-            Expanded(child: _buildContent()),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    final state = useCubitBuilder(_cubit);
 
-  Widget _buildContent() => FutureBuilder<List<Movie>>(
-      future: _movieList,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: Alignment.center,
-            child: Text(snapshot.error.toString()),
-          );
-        } else {
-          return _buildMoviesList(snapshot.data ?? []);
-        }
-      });
+    return state.maybeMap(
+      orElse: () => Center(
+        child: Text('Movie browser'),
+      ),
+      fetch: (_) => Center(
+        child: CircularProgressIndicator(),
+      ),
+      fetched: (e) => _buildMoviesList(e.movies),
+      error: (e) => Center(
+        child: Text(e.err),
+      ),
+    );
+  }
 
   Widget _buildMoviesList(List<Movie> movies) => ListView.separated(
         separatorBuilder: (context, index) => Container(
@@ -63,14 +69,4 @@ class _MovieListPage extends State<MovieListPage> {
         ),
         itemCount: movies.length,
       );
-
-  void _onSearchBoxSubmitted(String text) {
-    setState(() {
-      if (text.isNotEmpty) {
-        _movieList = apiService.searchMovies(text);
-      } else {
-        _movieList = Future.value([]);
-      }
-    });
-  }
 }
