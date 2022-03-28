@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_recruitment_task/pages/two_buttons/button_two_states.dart';
+import 'button_two_states.dart';
 
 class TwoButtonsPage extends StatefulWidget {
   @override
@@ -41,7 +41,7 @@ class _TwoButtonsPageState extends State<TwoButtonsPage> {
   }
 
   void _onButtonValueChange({
-    required int index, 
+    required int index,
     required bool isOn,
   }) {
     final int indexOtherButton = (index + 1) % _buttonIsOn.length;

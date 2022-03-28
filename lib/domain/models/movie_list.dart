@@ -1,5 +1,6 @@
-import 'package:flutter_recruitment_task/models/movie.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import 'movie.dart';
 
 part 'movie_list.g.dart';
 
@@ -13,8 +14,7 @@ class MovieList {
     required this.results,
   });
 
-  factory MovieList.fromJson(Map<String, dynamic> json) =>
-      _$MovieListFromJson(json);
+  factory MovieList.fromJson(Map<String, dynamic> json) => _$MovieListFromJson(json);
 
   Map<String, dynamic> toJson() => _$MovieListToJson(this);
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_recruitment_task/models/movie.dart';
-import 'package:flutter_recruitment_task/pages/movie_list/movie_card.dart';
-import 'package:flutter_recruitment_task/pages/movie_list/search_box.dart';
+import '../../../domain/models/movie.dart';
+import 'movie_card.dart';
+import 'search_box.dart';
 import 'package:flutter_recruitment_task/services/api_service.dart';
 
 class MovieListPage extends StatefulWidget {
