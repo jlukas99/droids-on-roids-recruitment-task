@@ -10,6 +10,9 @@ class MovieDtoMapper implements DataMapper<MovieDto, Movie> {
     return Movie(
       title: data.title,
       voteAverage: data.voteAverage,
+      posterUrl: data.posterUrl != null ? "https://image.tmdb.org/t/p/w500" + data.posterUrl! : null,
+      backdropUrl: data.backdropUrl != null ? "https://image.tmdb.org/t/p/w500" + data.backdropUrl! : null,
+      releaseDate: data.releaseDate,
       id: data.id,
     );
   }

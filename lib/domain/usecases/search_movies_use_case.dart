@@ -9,9 +9,5 @@ class SearchMoviesUseCase {
 
   const SearchMoviesUseCase(this._moviesRepository);
 
-  Future<List<Movie>> call(String query) async {
-    var _result = await _moviesRepository.searchMovies(query);
-
-    return _result.results;
-  }
+  Future<List<Movie>> call(String query) async => (await _moviesRepository.searchMovies(query)).results;
 }

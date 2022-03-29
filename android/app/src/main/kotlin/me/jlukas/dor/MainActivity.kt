@@ -1,4 +1,4 @@
-package com.example.flutter_recruitment_task
+package me.jlukas.dor
 
 import android.os.Build
 import android.os.Bundle

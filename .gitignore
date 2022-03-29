@@ -55,7 +55,7 @@ ios/build/
 **/key.properties
 
 # Generated
-**.g.dart
+#**.g.dart
 **.gr.dart
 **.gl.dart
 **.freezed.dart

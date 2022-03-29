@@ -1,10 +1,13 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_recruitment_task/presentation/pages/movie_list/cubit/movie_list_cubit.dart';
+import 'package:flutter_recruitment_task/presentation/pages/movie_list/widgets/search_box.dart';
+import 'package:flutter_recruitment_task/presentation/theme/app_dimens.dart';
+import 'package:flutter_recruitment_task/presentation/theme/app_typography.dart';
 import 'package:hooked_bloc/hooked_bloc.dart';
 import '../../../domain/models/movie.dart';
-import 'movie_card.dart';
-import 'search_box.dart';
+import 'widgets/movie_card.dart';
 
 class MovieListPage extends HookWidget {
   const MovieListPage({Key? key}) : super(key: key);
@@ -12,61 +15,117 @@ class MovieListPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = useCubit<MovieListCubit>();
+    final state = useCubitBuilder(cubit);
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: Icon(Icons.movie_creation_outlined),
-            onPressed: () {
-              //TODO implement navigation
-            },
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            centerTitle: false,
+            floating: true,
+            snap: true,
+            title: SearchBox(
+              onSubmitted: cubit.searchMovies,
+              onSelectedSort: cubit.sortMovies,
+            ),
           ),
-        ],
-        title: Text('Movie Browser'),
-      ),
-      body: Column(
-        children: <Widget>[
-          SearchBox(onSubmitted: cubit.searchMovies),
-          Expanded(child: _BuildContent(cubit)),
+          state.maybeMap(
+            orElse: () => _BuildContent(cubit),
+            fetched: (e) => _SliverMovieList(e.movies),
+          ),
         ],
       ),
     );
   }
 }
 
-class _BuildContent extends HookWidget {
+class _SliverMovieList extends StatelessWidget {
+  final List<Movie> movies;
+
+  const _SliverMovieList(
+    this.movies, {
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverSafeArea(
+      top: false,
+      sliver: SliverPadding(
+        padding: const EdgeInsets.all(AppDimens.s),
+        sliver: SliverGrid(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => MovieCard(movies[index]),
+            childCount: movies.length,
+          ),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 9 / 16,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BuildContent extends StatelessWidget {
   final MovieListCubit _cubit;
   const _BuildContent(this._cubit, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final state = useCubitBuilder(_cubit);
-
-    return state.maybeMap(
-      orElse: () => Center(
-        child: Text('Movie browser'),
-      ),
-      fetch: (_) => Center(
-        child: CircularProgressIndicator(),
-      ),
-      fetched: (e) => _buildMoviesList(e.movies),
-      error: (e) => Center(
-        child: Text(e.err),
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: FadeIn(
+        duration: const Duration(milliseconds: 375),
+        child: Padding(
+          padding: const EdgeInsets.all(AppDimens.m),
+          child: _cubit.state.maybeMap(
+            orElse: () => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.local_movies,
+                  color: Theme.of(context).cardColor,
+                  size: AppDimens.xxl,
+                ),
+                const SizedBox(height: AppDimens.m),
+                Text(
+                  "Search movies for Droids",
+                  style: AppTypography.subTitle.copyWith(
+                    color: Theme.of(context).cardColor,
+                  ),
+                ),
+              ],
+            ),
+            fetch: (_) => Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            error: (e) => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off_rounded,
+                  color: Theme.of(context).cardColor,
+                  size: AppDimens.xxl,
+                ),
+                const SizedBox(height: AppDimens.m),
+                Text(
+                  e.err,
+                  style: AppTypography.subTitle.copyWith(
+                    color: Theme.of(context).cardColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
-
-  Widget _buildMoviesList(List<Movie> movies) => ListView.separated(
-        separatorBuilder: (context, index) => Container(
-          height: 1.0,
-          color: Colors.grey.shade300,
-        ),
-        itemBuilder: (context, index) => MovieCard(
-          title: movies[index].title,
-          rating: '${(movies[index].voteAverage * 10).toInt()}%',
-          onTap: () {},
-        ),
-        itemCount: movies.length,
-      );
 }

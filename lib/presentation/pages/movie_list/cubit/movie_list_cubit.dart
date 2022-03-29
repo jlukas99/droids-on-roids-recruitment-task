@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter_recruitment_task/app/utils/enums.dart';
 import 'package:flutter_recruitment_task/domain/usecases/search_movies_use_case.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -12,27 +13,42 @@ part 'movie_list_cubit.freezed.dart';
 class MovieListCubit extends Cubit<MovieListState> {
   final SearchMoviesUseCase _searchMoviesUseCase;
 
-  MovieListCubit(this._searchMoviesUseCase) : super(MovieListState.initial());
+  MovieListCubit(this._searchMoviesUseCase) : super(const MovieListState.initial());
+
+  var _movies = <Movie>[];
+  var _sortType = SortType.dsc;
 
   void searchMovies(String query) async {
-    emit(MovieListState.fetch());
+    if (query.isEmpty) return emit(const MovieListState.initial());
 
-    var movies = <Movie>[];
+    emit(const MovieListState.fetch());
 
     try {
-      movies = await _searchMoviesUseCase(query);
+      _movies = await _searchMoviesUseCase(query);
 
-      if (movies.isEmpty) throw 'Nothing found';
+      if (_movies.isEmpty) throw 'Nothing found';
     } catch (e) {
       return emit(MovieListState.error(e.toString()));
     }
 
-    //Task 1 - sort by vote average.
-    movies = movies.sortedBy<num>((element) => element.voteAverage);
+    sortMovies(_sortType);
+  }
 
-    //Movies from best to worst
-    movies = movies.reversed.toList();
+  void sortMovies(SortType sortType) {
+    _sortType = sortType;
 
-    emit(MovieListState.fetched(movies));
+    if (_movies.isNotEmpty) {
+      switch (sortType) {
+        case SortType.asc:
+          emit(MovieListState.fetched(List.of(_movies.sortedBy<num>((element) => element.voteAverage))));
+          break;
+        case SortType.dsc:
+          emit(MovieListState.fetched(List.of(_movies.sortedBy<num>((element) => element.voteAverage).reversed)));
+          break;
+        case SortType.alphabet:
+          emit(MovieListState.fetched(List.of(_movies.sortedBy<String>((element) => element.title))));
+          break;
+      }
+    }
   }
 }

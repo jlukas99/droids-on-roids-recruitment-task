@@ -1,3 +1,4 @@
+import 'package:flutter_recruitment_task/data/dtos/movie_details_dto.dart';
 import 'package:injectable/injectable.dart';
 import 'package:retrofit/http.dart';
 import 'package:dio/dio.dart' hide Headers;
@@ -15,4 +16,7 @@ abstract class MoviesDataSources {
 
   @GET(Api.searchMovie)
   Future<MovieListDto> searchMovies(@Query('query') String query);
+
+  @GET(Api.movieDetails)
+  Future<MovieDetailsDto> getMovieDetails(@Path('id') int id);
 }

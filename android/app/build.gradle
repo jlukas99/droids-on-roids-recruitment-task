@@ -34,7 +34,7 @@ android {
 
 
     defaultConfig {
-        applicationId "com.example.flutter_recruitment_task"
+        applicationId "me.jlukas.dor"
         minSdkVersion 16
         targetSdkVersion 31
         versionCode flutterVersionCode.toInteger()

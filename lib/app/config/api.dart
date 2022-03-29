@@ -4,4 +4,5 @@ class Api {
 
   //GET
   static const searchMovie = "/search/movie";
+  static const movieDetails = "/movie/{id}";
 }
